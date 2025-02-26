@@ -1,0 +1,26 @@
+{
+  "name": "exsat-bridge-integration",
+  "version": "1.0.0",
+  "description": "ExSat Bridge Integration API Example",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "eosjs": "^22.1.0",
+    "express": "^4.21.2",
+    "node-fetch": "2.6.1",
+    "text-encoding": "^0.7.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.15.11",
+    "@types/node-fetch": "^2.6.12",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}
