@@ -1,113 +1,100 @@
-# ExSat Bridge EOS 集成示例 (TypeScript)
+# ExSat Bridge Integration Example (TypeScript)
 
-这是一个使用TypeScript集成EOS区块链的简单示例，主要演示如何调用EOS合约和查询合约表数据。
+This is a TypeScript example demonstrating how to integrate with the ExSat Bridge on the EOS blockchain. It shows how to call contract actions and query contract tables.
 
-## 功能
+## Features
 
-- 使用环境变量配置EOS账号和私钥
-- 通过HTTP API调用EOS合约的actions
-- 通过HTTP API查询EOS合约表数据
+- ExSat Bridge API integration
+- EOS contract interactions
+- BTC deposit address management
+- Environment-based configuration
 
-## 安装
+## Prerequisites
+
+- Node.js
+- yarn
+- EOS account with active permission
+
+## Installation
 
 ```bash
-# 安装依赖
-npm install
+# Install dependencies
+yarn install
 
-# 编译TypeScript
-npm run build
+# Build TypeScript
+yarn build
 ```
 
-## 配置
+## Configuration
 
-在项目根目录创建一个`.env`文件，设置以下环境变量：
+Create a `.env` file in the project root with the following environment variables:
 
 ```
-EOS_ACCOUNT=youreosaccount
-EOS_PRIVATE_KEY=yourprivatekey
-EOS_NODE_URL=https://eos.greymass.com
-EOS_CONTRACT=yourcontract
+EOS_ACCOUNT=your_eos_account
+EOS_PRIVATE_KEY=your_private_key
+EOS_NODE_URL=https://rpc-sg.exsat.network
+BRDGMNG_PERMISSION_ID=0
+RESOURCE_PAYMENT=false
 PORT=3000
 ```
 
-## 运行
+See the `.env.example` file for more details on each configuration parameter.
+
+## Running the Application
 
 ```bash
-npm start
+# Development mode
+yarn dev
+
+# Production mode
+yarn build
+yarn start
 ```
 
-## API接口
+## API Endpoints
 
-### 1. 调用合约Action
-
-**请求**:
+### Health Check
 ```
-POST /api/contract/action
+GET /api/health
+```
+
+### Apply for BTC Deposit Address
+```
+POST /api/brdgmng/appaddrmap
 Content-Type: application/json
 
 {
-  "action": "transfer",
-  "data": {
-    "from": "youreosaccount",
-    "to": "receiver",
-    "quantity": "1.0000 EOS",
-    "memo": "test transfer"
-  }
+  "recipient_address": "0xYourEvmAddress",
+  "remark": "optional note"
 }
 ```
 
-**响应**:
-```json
-{
-  "success": true,
-  "transactionId": "1a2b3c...",
-  "blockNum": 123456789,
-  "data": {
-    // 完整的交易结果
-  }
-}
+### Get BTC Deposit Address
+```
+GET /api/brdgmng/deposit-address/:recipientAddress
 ```
 
-### 2. 查询合约表
+## Example Usage
 
-**请求**:
-```
-GET /api/contract/table/accounts?scope=youreosaccount&limit=10
-```
-
-**响应**:
-```json
-{
-  "success": true,
-  "rows": [
-    {
-      "balance": "10.0000 EOS"
-    }
-  ],
-  "more": false
-}
-```
-
-## 使用示例
-
-### 调用合约示例 (使用curl)
+### Apply for BTC Address (using curl)
 
 ```bash
-curl -X POST http://localhost:3000/api/contract/action \
+curl -X POST http://localhost:3000/api/brdgmng/appaddrmap \
   -H "Content-Type: application/json" \
   -d '{
-    "action": "transfer",
-    "data": {
-      "from": "youreosaccount",
-      "to": "receiver",
-      "quantity": "1.0000 EOS",
-      "memo": "test transfer"
-    }
+    "recipient_address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    "remark": "test address"
   }'
 ```
 
-### 查询表示例 (使用curl)
+### Get BTC Address (using curl)
 
 ```bash
-curl -X GET "http://localhost:3000/api/contract/table/accounts?scope=youreosaccount"
+curl -X GET "http://localhost:3000/api/brdgmng/deposit-address/0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
 ```
+
+## Security Notes
+
+- Never commit your `.env` file containing your private key
+- Use proper permission management in production
+- Consider using a dedicated API key system for production deployments
