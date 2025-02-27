@@ -1,59 +1,56 @@
-import { Api, JsonRpc } from 'eosjs';
-import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
-import fetch from 'node-fetch';
-const { TextDecoder, TextEncoder } = require('text-encoding');
+import { Session } from '@wharfkit/session';
+import { APIClient } from '@wharfkit/antelope';
+import { WalletPluginPrivateKey } from '@wharfkit/wallet-plugin-privatekey';
 import { config } from '../config';
+import { ContractName } from '../utils';
 
-// Initialize EOS RPC connection
-const rpc = new JsonRpc(config.eosEndpoint, { fetch: fetch as any });
+const rpc = new APIClient({ url: config.eosNodeUrl });
+let session: Session | null = null;
 
-// Initialize signature provider if private key is available
-const signatureProvider = config.eosPrivateKey ? new JsSignatureProvider([config.eosPrivateKey]) : undefined;
-
-// Initialize EOS API
-const api = signatureProvider
-  ? new Api({
-      rpc,
-      signatureProvider,
-      textDecoder: new TextDecoder(),
-      textEncoder: new TextEncoder(),
-    })
-  : null;
-
-/**
- * Get table rows data
- */
-export async function getTableRows(params: any) {
-  try {
-    const result = await rpc.get_table_rows(params);
-    return result.rows;
-  } catch (error) {
-    console.error('Error getting table data:', error);
-    throw error;
+async function initializeSession() {
+  if (!session) {
+    const info = await rpc.v1.chain.get_info();
+    session = new Session({
+      chain: {
+        id: info.chain_id,
+        url: config.eosNodeUrl,
+      },
+      actor: config.eosAccount,
+      permission: 'active',
+      walletPlugin: new WalletPluginPrivateKey(config.eosPrivateKey),
+    });
+    // Log session initialization details
+    console.log('Session initialized with:', {
+      eosNodeUrl: config.eosNodeUrl,
+      eosAccount: config.eosAccount,
+    });
   }
 }
 
 /**
- * Execute contract action
+ * Execute action
  */
 export async function executeAction(account: string, name: string, data: any) {
-  if (!api) {
-    throw new Error('EOS private key not configured, unable to execute transaction');
-  }
+  await initializeSession();
 
+  if (!session) {
+    throw new Error('Session not initialized');
+  }
   const authorization = [
-    {
-      actor: 'res.xsat',
-      permission: 'bridge',
-    },
     {
       actor: config.eosAccount,
       permission: 'active',
     },
   ];
+  if (config.resourcePayment) {
+    authorization.unshift({
+      actor: ContractName.res,
+      permission: 'bridge',
+    });
+  }
 
   try {
-    const result = await api.transact(
+    const result = await session.transact(
       {
         actions: [
           {
@@ -65,14 +62,26 @@ export async function executeAction(account: string, name: string, data: any) {
         ],
       },
       {
-        blocksBehind: 3,
         expireSeconds: 30,
       }
     );
-
+    console.log('Transaction was successful boardcasted, transactionId:', result.response?.transaction_id);
     return result;
   } catch (error) {
     console.error('Error executing contract action:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get table rows data
+ */
+export async function getTableRows(params: any) {
+  try {
+    const result = await rpc.v1.chain.get_table_rows(params);
+    return result.rows;
+  } catch (error) {
+    console.error('Error getting table data:', error);
     throw error;
   }
 }

@@ -24,8 +24,9 @@ app.get('/', (req, res) => {
     name: 'ExSat Bridge Integration API',
     version: '1.0.0',
     endpoints: {
-      contractAction: '/api/brdgmng/appaddrmap',
-      getTable: '/api/contract/table/:table'
+      healthCheck: '/api/health',
+      applyBtcDepositAddress: '/api/brdgmng/appaddrmap',
+      getBtcDepositAddress: '/api/brdgmng/deposit-address'
     }
   });
 });
