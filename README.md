@@ -10,7 +10,7 @@ The exSat Bridge acts as an intermediary layer between your application and the 
 
 We provide implementation examples in several programming languages to help you get started quickly:
 
-- [JavaScript/Node.js Implementation](./javascript/README.md)
+- [TypeScript/Node.js Implementation](./typescript/README.md)
 - [Go Implementation](./golang/README.md)
 
 Each language-specific directory contains its own detailed documentation, code samples, and setup instructions.
