@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTableRows, executeAction } from './eosService';
+import { getTableRows, executeAction } from './eos_service';
 import { config } from '../config';
 import { computeId, IndexPosition, KeyType } from '../utils';
 
@@ -55,7 +55,7 @@ router.get('/brdgmng/deposit-address/:recipientAddress', async (req, res) => {
     };
     const rows = await getTableRows(params);
     if (rows && rows.length > 0) {
-      return res.json({ depositAddress: rows[0].btc_address });
+      return res.json({ recipientAddress, depositAddress: rows[0].btc_address });
     } else {
       return res.status(404).json({ error: 'Deposit address not found' });
     }
